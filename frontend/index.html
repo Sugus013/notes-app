@@ -1,17 +1,47 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <meta charset="UTF-8">
   <title>Notes App</title>
 </head>
 <body>
-  <h1>Notes</h1>
+  <h1>Notes App</h1>
   <form id="noteForm">
-    <input id="title" placeholder="Title"><br>
-    <textarea id="content" placeholder="Content"></textarea><br>
+    <input type="text" id="title" placeholder="Title" required>
+    <input type="text" id="content" placeholder="Content" required>
     <button type="submit">Add Note</button>
   </form>
-  <ul id="notes"></ul>
+  <ul id="notesList"></ul>
 
-  <script src="script.js"></script>
+  <script>
+    const backendURL = 'http://localhost:3000/notes'; // ganti nanti dengan IP EC2
+
+    async function loadNotes() {
+      const res = await fetch(backendURL);
+      const notes = await res.json();
+      const list = document.getElementById('notesList');
+      list.innerHTML = '';
+      notes.forEach(note => {
+        const li = document.createElement('li');
+        li.textContent = `${note.title}: ${note.content}`;
+        list.appendChild(li);
+      });
+    }
+
+    document.getElementById('noteForm').addEventListener('submit', async e => {
+      e.preventDefault();
+      const title = document.getElementById('title').value;
+      const content = document.getElementById('content').value;
+      await fetch(backendURL, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ title, content })
+      });
+      document.getElementById('noteForm').reset();
+      loadNotes();
+    });
+
+    loadNotes();
+  </script>
 </body>
 </html>
