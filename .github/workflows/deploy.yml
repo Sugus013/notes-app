@@ -1,0 +1,30 @@
+name: Deploy Notes App to EC2
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v3
+
+    - name: Setup SSH
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ secrets.EC2_KEY }}" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        ssh-keyscan ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
+
+    - name: Deploy to EC2
+      run: |
+        ssh ubuntu@${{ secrets.EC2_HOST }} << 'EOF'
+          cd ~/notes-app
+          git pull origin main
+          cd backend && pm2 restart notes-backend || pm2 start server.js --name notes-backend
+          cd ../frontend && npm run build
+        EOF

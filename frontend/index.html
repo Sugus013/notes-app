@@ -14,7 +14,7 @@
   <ul id="notesList"></ul>
 
   <script>
-    const backendURL = 'http://localhost:3000/notes'; // ganti nanti dengan IP EC2
+    const backendURL = 'http://47.129.5.171:3000/notes'; // ganti nanti dengan IP EC2
 
     async function loadNotes() {
       const res = await fetch(backendURL);
